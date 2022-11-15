@@ -69,4 +69,24 @@ app.get("/todo", async (req, res) => {
   return res.json(todos);
 });
 
+app.get("/todo/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const todo = await Todo.findById(id);
+  return res.json(todo);
+});
+
+app.put("/todo/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await Todo.findByIdAndUpdate(id, req.body);
+  } catch (err) {
+    return res.status(400).json(err);
+  }
+
+  const todo = await Todo.findById(id);
+  return res.json(todo);
+});
+
 app.listen(3000);
