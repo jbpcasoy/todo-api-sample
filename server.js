@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const moment = require("moment");
 const Todo = require("./model/Todo");
 mongoose.connect("mongodb://localhost:27017/todo");
 
@@ -26,6 +27,46 @@ app.post("/todo", async function (req, res) {
   const todo = await Todo.create(req.body);
 
   return res.status(201).json(todo);
+});
+
+app.get("/todo", async (req, res) => {
+  const {
+    skip,
+    limit,
+    title = "",
+    description = "",
+    sortBy = "updatedAt",
+    sortOrder = "desc",
+    deadline,
+  } = req.query;
+
+  const today = moment(deadline).startOf("day");
+
+  const query = {
+    title: {
+      $regex: title,
+    },
+    description: {
+      $regex: description,
+    },
+    deadline: {
+      $gte: today.toDate(),
+      $lte: moment(today).endOf("day").toDate(),
+    },
+  };
+
+  if (!deadline) {
+    delete query.deadline;
+  }
+
+  const todos = await Todo.find(query)
+    .sort({
+      [sortBy]: sortOrder,
+    })
+    .skip(skip)
+    .limit(limit);
+
+  return res.json(todos);
 });
 
 app.listen(3000);
