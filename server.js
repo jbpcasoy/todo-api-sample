@@ -89,4 +89,15 @@ app.put("/todo/:id", async (req, res) => {
   return res.json(todo);
 });
 
+app.delete("/todo/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const todo = await Todo.findByIdAndDelete(id);
+    return res.json(todo);
+  } catch (err) {
+    return res.status(400).json(err);
+  }
+});
+
 app.listen(3000);
